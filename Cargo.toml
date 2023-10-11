@@ -9,9 +9,8 @@ edition = "2021"
 bootloader = "0.9.23"
 volatile = "0.2.6"
 spin="0.9.8"
+x86_64 = "0.14.10"
 
-[profile.dev]
-panic = "abort"
-
-[profile.release]
-panic = "abort"
+[package.metadata.bootimage]
+test-args = ["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04"]
+test-success-exit-code = 33
