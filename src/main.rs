@@ -4,16 +4,20 @@
 #![test_runner(osos::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+extern crate alloc;
+
+use alloc::boxed::Box;
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 use osos::println;
+use x86_64::VirtAddr;
 
 entry_point!(kernel_main);
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
-    use osos::memory;
-    use osos::memory::BootInfoFrameAllocator;
-    use x86_64::{structures::paging::Page, VirtAddr};
+    use osos::allocator; // new import
+    use osos::memory::{self, BootInfoFrameAllocator};
+
     println!("Hello World{}", "!");
     osos::init();
 
@@ -21,21 +25,16 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     let mut mapper = unsafe { memory::init(phys_mem_offset) };
     let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_map) };
 
-    // map an unused page
-    let page = Page::containing_address(VirtAddr::new(0xdeadbeaf000));
-    memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
+    // new
+    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 
-    // write the string `New!` to the screen through the new mapping
-    let page_ptr: *mut u64 = page.start_address().as_mut_ptr();
-    unsafe { page_ptr.offset(400).write_volatile(0x_f021_f077_f065_f04e) };
+    let x = Box::new(41);
 
-    #[cfg(test)]
-    test_main();
+    // […] call `test_main` in test mode
 
     println!("It did not crash!");
     osos::hlt_loop();
 }
-
 /// This function is called on panic.
 #[cfg(not(test))]
 #[panic_handler]
