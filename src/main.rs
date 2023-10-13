@@ -9,7 +9,8 @@ extern crate alloc;
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
 use osos::println;
-use osos::task::{simple_executor::SimpleExecutor, Task};
+use osos::task::keyboard;
+use osos::task::{executor::Executor, Task};
 use x86_64::VirtAddr;
 
 async fn async_number() -> u32 {
@@ -37,14 +38,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     // new
     allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 
-    let mut executor = SimpleExecutor::new();
+    let mut executor = Executor::new();
     executor.spawn(Task::new(example_task()));
+    executor.spawn(Task::new(keyboard::print_keypresses())); // new
     executor.run();
-
-    // […] call `test_main` in test mode
-
-    println!("It did not crash!");
-    osos::hlt_loop();
 }
 /// This function is called on panic.
 #[cfg(not(test))]
