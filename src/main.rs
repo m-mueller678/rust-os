@@ -1,3 +1,5 @@
+extern crate bootloader;
+
 use std::path::PathBuf;
 
 fn main() {

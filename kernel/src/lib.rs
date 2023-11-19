@@ -55,7 +55,7 @@ pub fn exit_qemu(exit_code: u32) {
     }
 }
 
-pub fn hlt_loop() -> ! {
+pub fn fatal() -> ! {
     loop {
         x86_64::instructions::hlt();
     }
@@ -65,5 +65,5 @@ pub fn hlt_loop() -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     error!("{}", info);
-    hlt_loop();
+    fatal();
 }

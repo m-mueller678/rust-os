@@ -1,33 +1,19 @@
-use crate::{gdt, vga_println};
+use crate::fatal;
 use pic8259::ChainedPics;
 use spin::{self, Lazy};
+use tracing::error;
+use x86_64::set_general_handler;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
 pub fn init_idt() {
     static IDT: Lazy<InterruptDescriptorTable> = Lazy::new(|| {
         let mut idt = InterruptDescriptorTable::new();
-        idt.breakpoint.set_handler_fn(breakpoint_handler);
-        unsafe {
-            idt.double_fault
-                .set_handler_fn(double_fault_handler)
-                .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX);
-        }
+        set_general_handler!(&mut idt, general_interrupt_fatal, 0..32);
         idt[InterruptIndex::Timer.as_usize()].set_handler_fn(timer_interrupt_handler);
         idt[InterruptIndex::Keyboard.as_usize()].set_handler_fn(keyboard_interrupt_handler);
         idt
     });
     IDT.load();
-}
-
-extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
-    vga_println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
-}
-
-extern "x86-interrupt" fn double_fault_handler(
-    stack_frame: InterruptStackFrame,
-    error_code: u64,
-) -> ! {
-    panic!("EXCEPTION: DOUBLE FAULT [{error_code}]\n{:#?}", stack_frame);
 }
 
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
@@ -73,4 +59,9 @@ impl InterruptIndex {
     fn as_usize(self) -> usize {
         usize::from(self.as_u8())
     }
+}
+
+fn general_interrupt_fatal(stack_frame: InterruptStackFrame, index: u8, error_code: Option<u64>) {
+    error!(%index,?error_code,?stack_frame,"unhandled interrupt");
+    fatal()
 }
