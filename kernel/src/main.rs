@@ -17,7 +17,7 @@ async fn example_task() {
     info!("async number: {}", number);
 }
 
-entry_point!(kernel_main);
+entry_point!(kernel_main, config = &kernel::BOOT_CONFIG);
 
 fn kernel_main(boot_info: &'static mut BootInfo) -> ! {
     kernel::init(boot_info);

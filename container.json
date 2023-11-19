@@ -1,0 +1,10 @@
+
+  {
+    "Description": "osos",
+    "Format": "raw",
+    "UserBucket": {
+        "S3Bucket": "ex2-disk-images",
+        "S3Key": "osos"
+    }
+  }
+

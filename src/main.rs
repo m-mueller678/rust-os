@@ -6,7 +6,7 @@ fn main() {
     } else {
         let kernel = PathBuf::from(std::env::args_os().nth(1).unwrap());
         let image = PathBuf::from(std::env::args_os().nth(2).unwrap());
-        bootloader::UefiBoot::new(&kernel)
+        bootloader::BiosBoot::new(&kernel)
             .create_disk_image(&image)
             .unwrap();
     }

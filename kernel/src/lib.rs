@@ -10,7 +10,8 @@ extern crate alloc;
 use crate::log::init_log;
 use crate::memory::BootInfoFrameAllocator;
 use ::log::debug;
-use bootloader_api::BootInfo;
+use bootloader_api::config::Mapping;
+use bootloader_api::{BootInfo, BootloaderConfig};
 use core::panic::PanicInfo;
 use tracing::{error, info};
 use x86_64::VirtAddr;
@@ -23,6 +24,12 @@ pub mod memory;
 pub mod serial;
 pub mod task;
 pub mod vga_buffer;
+
+pub static BOOT_CONFIG: BootloaderConfig = {
+    let mut c = BootloaderConfig::new_default();
+    c.mappings.physical_memory = Some(Mapping::Dynamic);
+    c
+};
 
 pub fn init(boot_info: &'static BootInfo) {
     init_log();
