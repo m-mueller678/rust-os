@@ -1,4 +1,4 @@
-use crate::{gdt, print, println};
+use crate::{gdt, vga_println};
 use pic8259::ChainedPics;
 use spin::{self, Lazy};
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
@@ -20,7 +20,7 @@ pub fn init_idt() {
 }
 
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
-    println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
+    vga_println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
 }
 
 extern "x86-interrupt" fn double_fault_handler(

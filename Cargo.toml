@@ -6,22 +6,20 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bootloader = { version = "0.9.23", features = ["map_physical_memory"]}
+bootloader = { version = "0.9.23", features = ["map_physical_memory"] }
 volatile = "0.2.6"
-spin="0.9.8"
+spin = "0.9.8"
 x86_64 = "0.14.10"
 uart_16550 = "0.2.0"
 pic8259 = "0.10.1"
 pc-keyboard = "0.5.0"
 linked_list_allocator = "0.9.0"
+tracing = { version = "0.1.40", features = ['log'], default-features = false }
+log = { version = "0.4.20" }
+hermit-sync = "0.1.5"
 
 [package.metadata.bootimage]
-test-args = ["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04","-serial","stdio","-display", "none"]
-test-success-exit-code = 33
-
-[[test]]
-name = "should_panic"
-harness = false
+run-args = ['-display', 'none',"-serial", "stdio",]
 
 [dependencies.crossbeam-queue]
 version = "0.2.1"
