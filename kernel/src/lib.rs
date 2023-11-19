@@ -8,7 +8,12 @@
 extern crate alloc;
 
 use crate::log::init_log;
+use crate::memory::BootInfoFrameAllocator;
 use ::log::debug;
+use bootloader_api::BootInfo;
+use core::panic::PanicInfo;
+use tracing::{error, info};
+use x86_64::VirtAddr;
 
 pub mod allocator;
 pub mod gdt;
@@ -19,13 +24,20 @@ pub mod serial;
 pub mod task;
 pub mod vga_buffer;
 
-pub fn init() {
+pub fn init(boot_info: &'static BootInfo) {
     init_log();
-    debug!("logger init");
+    debug!("logger initialized");
+    info!("bootinfo: {:#?}", boot_info);
     gdt::init();
     interrupts::init_idt();
     unsafe { interrupts::PICS.lock().initialize() };
     x86_64::instructions::interrupts::enable();
+
+    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset.into_option().unwrap());
+    let mut mapper = unsafe { memory::init(phys_mem_offset) };
+    let mut frame_allocator = unsafe { BootInfoFrameAllocator::init(&boot_info.memory_regions) };
+
+    allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
 }
 
 pub fn exit_qemu(exit_code: u32) {
@@ -40,4 +52,11 @@ pub fn hlt_loop() -> ! {
     loop {
         x86_64::instructions::hlt();
     }
+}
+
+/// This function is called on panic.
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    error!("{}", info);
+    hlt_loop();
 }

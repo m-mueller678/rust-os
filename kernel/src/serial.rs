@@ -2,6 +2,7 @@ use hermit_sync::InterruptTicketMutex;
 use spin::{Lazy, Mutex};
 use uart_16550::SerialPort;
 
+//TODO Lazy Mutex is unnecessary
 pub static SERIAL1: Lazy<Mutex<SerialPort>> = Lazy::new(|| {
     let mut serial_port = unsafe { SerialPort::new(0x3F8) };
     serial_port.init();
