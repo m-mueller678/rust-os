@@ -17,6 +17,8 @@ linked_list_allocator = "0.9.0"
 tracing = { version = "0.1.40", features = ['log'], default-features = false }
 log = { version = "0.4.20" }
 hermit-sync = "0.1.5"
+humansize= { version = "2.1.3",features = ["impl_style"] }
+itertools = { version = "0.12.0" ,default-features = false}
 
 [package.metadata.bootimage]
 run-args = ['-display', 'none',"-serial", "stdio",]
