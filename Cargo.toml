@@ -8,3 +8,11 @@ ovmf-prebuilt = "0.1.0-alpha.1"
 
 [workspace]
 members = ["kernel"]
+
+[profile.dev]
+split-debuginfo='unpacked'
+strip='symbols'
+
+[profile.release]
+split-debuginfo='unpacked'
+strip='symbols'

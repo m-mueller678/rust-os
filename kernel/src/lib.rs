@@ -37,6 +37,7 @@ pub fn init(boot_info: &'static BootInfo) {
     info!("bootinfo: {:#?}", boot_info);
     gdt::init();
     interrupts::init_idt();
+
     unsafe { interrupts::PICS.lock().initialize() };
     x86_64::instructions::interrupts::enable();
 
